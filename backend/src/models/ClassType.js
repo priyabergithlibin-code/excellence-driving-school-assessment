@@ -2,10 +2,11 @@ const mongoose = require("mongoose");
 
 const ClassTypeSchema = new mongoose.Schema(
   {
-    classTypeId: { type: String, required: true, unique: true, index: true },
-    name: { type: String, default: "" },
+    classId: { type: Number, required: true, unique: true },
+    title: { type: String, required: true },
   },
-  { timestamps: true },
+  { timestamps: true, collection: "classTypes" },
 );
 
-module.exports = mongoose.model("ClassType", ClassTypeSchema);
+module.exports =
+  mongoose.models.ClassType || mongoose.model("ClassType", ClassTypeSchema);

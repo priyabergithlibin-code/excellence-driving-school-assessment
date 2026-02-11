@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Registration = require("../../models/Registration");
-const Student = require("../../models/student");
+const Student = require("../../models/student.js");
 const Instructor = require("../../models/Instructor");
 const ClassType = require("../../models/ClassType");
 const Counter = require("../../models/Counter");
@@ -115,7 +115,7 @@ async function getNextRegistrationId() {
     { $inc: { seq: 1 } },
     { new: true, upsert: true },
   );
-  return counter.seq; // 1001, 1002, ...
+  return counter.seq;
 }
 
 function toRegistrationIdNumber(value) {
@@ -163,21 +163,26 @@ async function countByDay(filter, date, excludeMongoId = null) {
 }
 
 async function ensureStudent(studentId) {
-  const exists = await Student.findOne({ studentId }).select("_id").lean();
+  const sid = Number(studentId);
+  const exists = await Student.findOne({ studentId: sid }).select("_id").lean();
   if (exists) return true;
-  await Student.create({ studentId });
+  await Student.create({ studentId: sid });
   return true;
 }
 
 async function ensureInstructor(instructorId) {
-  const exists = await Instructor.findOne({ instructorId })
+  const exists = await Instructor.findOne({
+    instructorId: Number(instructorId),
+  })
     .select("_id")
     .lean();
   return !!exists;
 }
 
 async function ensureClassType(classTypeId) {
-  const exists = await ClassType.findOne({ classTypeId }).select("_id").lean();
+  const exists = await ClassType.findOne({ classId: Number(classTypeId) })
+    .select("_id")
+    .lean();
   return !!exists;
 }
 
