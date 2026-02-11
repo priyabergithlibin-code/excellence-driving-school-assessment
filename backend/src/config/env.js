@@ -24,7 +24,13 @@ const env = {
     10,
   ),
 
-  AUTO_ADD_STUDENTS: process.env.AUTO_ADD_STUDENTS || "true",
+  AUTO_ADD_STUDENTS: (process.env.AUTO_ADD_STUDENTS ?? "true") === "true",
+
+  TIMEZONE: process.env.TIMEZONE || "Asia/Dubai",
 };
+
+if (!env.MONGO_URI) {
+  throw new Error("MONGO_URI is required");
+}
 
 module.exports = { env };

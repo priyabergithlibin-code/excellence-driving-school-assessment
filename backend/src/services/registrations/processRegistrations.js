@@ -3,6 +3,7 @@ const Registration = require("../../models/Registration");
 const Student = require("../../models/student");
 const Instructor = require("../../models/Instructor");
 const ClassType = require("../../models/ClassType");
+const Counter = require("../../models/Counter");
 
 const CLASS_DURATION_MINUTES = Number(process.env.CLASS_DURATION_MINUTES || 45);
 const MAX_STUDENT_CLASSES_PER_DAY = Number(
@@ -94,7 +95,7 @@ function okResult({ rowIndex, action, registrationId, message }) {
     row: rowIndex + 1,
     action,
     status: "success",
-    registrationId: registrationId || null,
+    registrationId: registrationId ?? null,
     message: message || "OK",
   };
 }
@@ -108,12 +109,29 @@ function errResult({ rowIndex, action, message }) {
   };
 }
 
+async function getNextRegistrationId() {
+  const counter = await Counter.findOneAndUpdate(
+    { name: "registrationId" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true },
+  );
+  return counter.seq; // 1001, 1002, ...
+}
+
+function toRegistrationIdNumber(value) {
+  const s = toTrimmedString(value);
+  if (!s) return null;
+  const n = Number(s);
+  if (!Number.isInteger(n)) return null;
+  return n;
+}
+
 async function hasOverlap({
   studentId,
   instructorId,
   startTime,
   endTime,
-  excludeRegistrationObjectId,
+  excludeMongoId,
 }) {
   const query = {
     status: "active",
@@ -122,15 +140,15 @@ async function hasOverlap({
     $or: [{ studentId }, { instructorId }],
   };
 
-  if (excludeRegistrationObjectId) {
-    query._id = { $ne: excludeRegistrationObjectId };
+  if (excludeMongoId) {
+    query._id = { $ne: excludeMongoId };
   }
 
   const conflict = await Registration.findOne(query).lean();
   return !!conflict;
 }
 
-async function countByDay(filter, date, excludeId = null) {
+async function countByDay(filter, date, excludeMongoId = null) {
   const { start, end } = dayRange(date);
 
   const query = {
@@ -139,7 +157,7 @@ async function countByDay(filter, date, excludeId = null) {
     ...filter,
   };
 
-  if (excludeId) query._id = { $ne: excludeId };
+  if (excludeMongoId) query._id = { $ne: excludeMongoId };
 
   return Registration.countDocuments(query);
 }
@@ -168,7 +186,6 @@ async function processRegistrations(rows) {
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-
     const action = normalizeAction(getField(row, "Action"));
 
     try {
@@ -194,13 +211,15 @@ async function processRegistrations(rows) {
         continue;
       }
 
-      const registrationId = toTrimmedString(getField(row, "Registration ID"));
+      const registrationIdRaw = getField(row, "Registration ID");
+      const registrationIdNum = toRegistrationIdNumber(registrationIdRaw);
+
       const studentId = toTrimmedString(getField(row, "Student ID"));
       const instructorId = toTrimmedString(getField(row, "Instructor ID"));
       const classTypeId = toTrimmedString(getField(row, "Class ID"));
 
       if (action === "delete") {
-        if (!registrationId) {
+        if (!registrationIdNum) {
           results.push(
             errResult({
               rowIndex: i,
@@ -211,19 +230,9 @@ async function processRegistrations(rows) {
           continue;
         }
 
-        if (!mongoose.isValidObjectId(registrationId)) {
-          results.push(
-            errResult({
-              rowIndex: i,
-              action,
-              message:
-                "Invalid Registration ID format (must be Mongo ObjectId). Use the id returned by 'new'.",
-            }),
-          );
-          continue;
-        }
-
-        const existing = await Registration.findById(registrationId);
+        const existing = await Registration.findOne({
+          registrationId: registrationIdNum,
+        });
         if (!existing) {
           results.push(
             errResult({
@@ -242,7 +251,7 @@ async function processRegistrations(rows) {
           okResult({
             rowIndex: i,
             action,
-            registrationId: String(existing._id),
+            registrationId: existing.registrationId,
             message: "Canceled",
           }),
         );
@@ -277,8 +286,7 @@ async function processRegistrations(rows) {
 
       await ensureStudent(studentId);
 
-      const instructorOk = await ensureInstructor(instructorId);
-      if (!instructorOk) {
+      if (!(await ensureInstructor(instructorId))) {
         results.push(
           errResult({
             rowIndex: i,
@@ -289,8 +297,7 @@ async function processRegistrations(rows) {
         continue;
       }
 
-      const classOk = await ensureClassType(classTypeId);
-      if (!classOk) {
+      if (!(await ensureClassType(classTypeId))) {
         results.push(
           errResult({
             rowIndex: i,
@@ -302,13 +309,7 @@ async function processRegistrations(rows) {
       }
 
       if (action === "new") {
-        const conflict = await hasOverlap({
-          studentId,
-          instructorId,
-          startTime,
-          endTime,
-        });
-        if (conflict) {
+        if (await hasOverlap({ studentId, instructorId, startTime, endTime })) {
           results.push(
             errResult({
               rowIndex: i,
@@ -361,8 +362,10 @@ async function processRegistrations(rows) {
           );
           continue;
         }
+        const nextRegistrationId = await getNextRegistrationId();
 
         const created = await Registration.create({
+          registrationId: nextRegistrationId,
           studentId,
           instructorId,
           classTypeId,
@@ -375,37 +378,27 @@ async function processRegistrations(rows) {
           okResult({
             rowIndex: i,
             action,
-            registrationId: String(created._id),
+            registrationId: created.registrationId,
             message: "Created",
           }),
         );
         continue;
       }
 
-      if (!registrationId) {
+      if (!registrationIdNum) {
         results.push(
           errResult({
             rowIndex: i,
             action,
-            message: "Registration ID is required for update",
+            message: "Registration ID (number) is required for update",
           }),
         );
         continue;
       }
 
-      if (!mongoose.isValidObjectId(registrationId)) {
-        results.push(
-          errResult({
-            rowIndex: i,
-            action,
-            message:
-              "Invalid Registration ID format (must be Mongo ObjectId). Use the id returned by 'new'.",
-          }),
-        );
-        continue;
-      }
-
-      const existing = await Registration.findById(registrationId);
+      const existing = await Registration.findOne({
+        registrationId: registrationIdNum,
+      });
       if (!existing) {
         results.push(
           errResult({ rowIndex: i, action, message: "Registration not found" }),
@@ -413,14 +406,15 @@ async function processRegistrations(rows) {
         continue;
       }
 
-      const conflict = await hasOverlap({
-        studentId,
-        instructorId,
-        startTime,
-        endTime,
-        excludeRegistrationObjectId: existing._id,
-      });
-      if (conflict) {
+      if (
+        await hasOverlap({
+          studentId,
+          instructorId,
+          startTime,
+          endTime,
+          excludeMongoId: existing._id,
+        })
+      ) {
         results.push(
           errResult({
             rowIndex: i,
@@ -486,7 +480,7 @@ async function processRegistrations(rows) {
         okResult({
           rowIndex: i,
           action,
-          registrationId: String(existing._id),
+          registrationId: existing.registrationId,
           message: "Updated",
         }),
       );
