@@ -35,7 +35,6 @@ export default function UploadCard({
     }
 
     setFile(f);
-
     e.target.value = "";
   }
 
@@ -52,10 +51,7 @@ export default function UploadCard({
 
     try {
       await onUpload(file);
-
-      if (!uploadError) {
-        setFile(null);
-      }
+      if (!uploadError) setFile(null);
     } catch (err) {
       console.error("UploadCard: upload failed", err);
     }
@@ -63,27 +59,33 @@ export default function UploadCard({
 
   const disabledChoose = isUploading;
   const disabledUpload = !file || isUploading;
+  const successCount = (uploadResult?.results || []).filter(
+    (r) => r.status === "success",
+  ).length;
+  const failedCount = (uploadResult?.results || []).filter(
+    (r) => r.status !== "success",
+  ).length;
 
   return (
-    <div>
-      <div className="row gap">
+    <div className="uploadPanel">
+      <div className="row gap uploadActions">
         <button
-          className="btn primary"
+          className={`btn uploadChoose ${!file && !isUploading ? "readyUpload" : ""}`}
           type="button"
           onClick={choose}
           disabled={disabledChoose}
         >
-          Choose CSV File...
+          Choose CSV File
         </button>
 
         <button
-          className={`btn ${file && !isUploading ? "readyUpload" : ""}`}
+          className={`btn uploadSubmit ${file && !isUploading ? "readyUpload" : ""}`}
           type="button"
           onClick={upload}
           disabled={disabledUpload}
           title={!file ? "Select a CSV file first" : ""}
         >
-          {isUploading ? "Processing..." : "Upload & Process"}
+          {isUploading ? "Processing..." : "Upload and Process"}
         </button>
 
         <input
@@ -95,22 +97,20 @@ export default function UploadCard({
         />
       </div>
 
-      <div className="muted small" style={{ marginTop: 10 }}>
+      <div className="uploadFileMeta">
         {file
-          ? `Selected: ${file.name}`
-          : "Choose a CSV file to enable upload."}
+          ? `Selected file: ${file.name}`
+          : "No file selected yet. Please choose a CSV file."}
       </div>
 
       {isUploading && (
-        <div className="progressWrap">
+        <div className="progressWrap uploadProgressCard">
           <div className="muted small">
             Processing: {uploadFileName || file?.name || "-"}
           </div>
-
           <div className="progressBar">
             <div className="progressFill" style={{ width: `${uploadPct}%` }} />
           </div>
-
           <div className="pct">{uploadPct}%</div>
         </div>
       )}
@@ -119,25 +119,20 @@ export default function UploadCard({
 
       {!!uploadResult && (
         <div className="resultBox">
-          <div className="muted small">CSV Upload Completed</div>
+          <div className="muted small">Upload Completed</div>
 
-          <div className="summaryBox">
-            <div>Total Rows: {uploadResult?.count || 0}</div>
-            <div>
-              Successful:{" "}
-              {
-                (uploadResult?.results || []).filter(
-                  (r) => r.status === "success",
-                ).length
-              }
+          <div className="uploadStats">
+            <div className="uploadStat">
+              <span className="muted small">Total</span>
+              <strong>{uploadResult?.count || 0}</strong>
             </div>
-            <div>
-              Failed:{" "}
-              {
-                (uploadResult?.results || []).filter(
-                  (r) => r.status !== "success",
-                ).length
-              }
+            <div className="uploadStat">
+              <span className="muted small">Successful</span>
+              <strong>{successCount}</strong>
+            </div>
+            <div className="uploadStat">
+              <span className="muted small">Failed</span>
+              <strong>{failedCount}</strong>
             </div>
           </div>
 
@@ -159,7 +154,7 @@ export default function UploadCard({
                   >
                     {r.status === "success"
                       ? `Registration ID ${id} has been ${verb} successfully.`
-                      : `Row ${r.row ?? idx} was rejected — ${
+                      : `Row ${r.row ?? idx} was rejected - ${
                           r.message || "Unknown error."
                         }`}
                   </li>

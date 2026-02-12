@@ -65,11 +65,10 @@ function MetricsTooltip({ active, payload, label }) {
 
 export default function MetricsCard({ refreshKey }) {
   const [metrics, setMetrics] = useState([]);
-  const [initialLoading, setInitialLoading] = useState(true); // only for first load
-  const [updating, setUpdating] = useState(false); // background refresh indicator
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [err, setErr] = useState("");
 
-  // default range: last 14 days
   const [to, setTo] = useState(() => toInputDate(new Date()));
   const [from, setFrom] = useState(() => {
     const d = new Date();
@@ -78,6 +77,8 @@ export default function MetricsCard({ refreshKey }) {
   });
 
   const aliveRef = useRef(true);
+  const hasLoadedRef = useRef(false);
+
   useEffect(() => {
     aliveRef.current = true;
     return () => {
@@ -90,7 +91,7 @@ export default function MetricsCard({ refreshKey }) {
 
     async function load({ initial = false } = {}) {
       try {
-        if (initial) {
+        if (initial && !hasLoadedRef.current) {
           setInitialLoading(true);
         } else {
           setUpdating(true);
@@ -107,6 +108,7 @@ export default function MetricsCard({ refreshKey }) {
         if (aliveRef.current) {
           setMetrics(mapped);
           setErr("");
+          hasLoadedRef.current = true;
         }
       } catch (e) {
         if (aliveRef.current) {
@@ -120,8 +122,7 @@ export default function MetricsCard({ refreshKey }) {
       }
     }
 
-    load({ initial: true });
-
+    load({ initial: !hasLoadedRef.current });
     timer = setInterval(() => load({ initial: false }), 5000);
 
     return () => clearInterval(timer);
@@ -164,7 +165,7 @@ export default function MetricsCard({ refreshKey }) {
       )}
 
       {initialLoading ? (
-        <div className="muted small metricsEmpty">Loading metrics…</div>
+        <div className="muted small metricsEmpty">Loading metrics...</div>
       ) : (
         <div className="metricsChart" style={{ height: 300, width: "100%" }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -214,7 +215,9 @@ export default function MetricsCard({ refreshKey }) {
                 strokeWidth={3}
                 dot={false}
                 activeDot={{ r: 6 }}
-                isAnimationActive={false}
+                isAnimationActive
+                animationDuration={450}
+                animationEasing="ease-out"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -230,7 +233,7 @@ export default function MetricsCard({ refreshKey }) {
                 opacity: 0.9,
               }}
             >
-              Refreshing…
+              Refreshing...
             </div>
           )}
         </div>

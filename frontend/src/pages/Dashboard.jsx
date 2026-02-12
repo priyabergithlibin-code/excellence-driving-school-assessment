@@ -80,7 +80,6 @@ export default function Dashboard() {
 
       <div className="card">
         <h2 className="cardTitle">Scheduled Classes Overview</h2>
-        <p className="cardSub">Scheduled Classes Per Day</p>
         <MetricsCard refreshKey={metricsRefreshKey} />
       </div>
     </div>

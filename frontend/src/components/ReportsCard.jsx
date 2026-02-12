@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { fetchClassReports } from "../api/report";
 
 function toDDMMYYYY(yyyyMmDd) {
@@ -147,7 +147,7 @@ export default function ReportsCard({
         </div>
 
         <button
-          className="btn primary"
+          className="btn uploadSubmit readyUpload"
           type="button"
           onClick={applyFilters}
           disabled={loading}
@@ -168,7 +168,7 @@ export default function ReportsCard({
           <thead>
             <tr>
               <th style={{ width: 70 }}>ID</th>
-              <th style={{ width: 110 }}>Student</th> {/* ✅ added */}
+              <th style={{ width: 110 }}>Student</th>
               <th style={{ width: 120 }}>Date</th>
               <th>Class Type</th>
               <th style={{ width: 160 }}>Instructor</th>

@@ -85,7 +85,7 @@ export default function ConfigCard({ config, onSave, onReset, status }) {
             Reset
           </button>
           <button
-            className="btn primary"
+            className="btn uploadSubmit readyUpload"
             type="button"
             onClick={() => onSave?.(draft)}
           >

@@ -1,10 +1,11 @@
 export default function TopNav({ activeTab, onTabChange }) {
-  const tabs = ["Dashboard", "Reports", "Settings"]; // keep "Reports" consistent
+  const tabs = ["Dashboard", "Reports", "Settings"];
 
   return (
     <div className="topnav">
       <div className="brand">
-        <span className="brand-title">Excellence Driving School</span>
+        <img src="/logo.png" alt="Elite Driving School" className="logo" />
+        <span>Elite Driving School</span>
       </div>
 
       <div className="topnav-right">
@@ -21,7 +22,6 @@ export default function TopNav({ activeTab, onTabChange }) {
           ))}
         </div>
 
-        {/* Admin Profile Circle */}
         <button className="profileBtn" type="button" title="Admin">
           <span className="profileCircle">A</span>
         </button>
