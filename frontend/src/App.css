@@ -126,10 +126,7 @@
   color: var(--text);
   cursor: pointer;
 }
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+
 .btn.primary {
   background: rgba(57, 217, 138, 0.18);
   border-color: rgba(57, 217, 138, 0.35);
@@ -379,4 +376,68 @@
 
 .metricsEmpty {
   margin-top: 20px;
+}
+
+.summaryBox {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  display: flex;
+  gap: 20px;
+}
+
+.resultList {
+  margin-top: 6px;
+  padding-left: 18px;
+}
+
+.resultList li {
+  margin-bottom: 6px;
+}
+
+.resultList li.ok {
+  color: #9ff7c3;
+}
+
+.resultList li.bad {
+  color: #ffb3b3;
+}
+
+.resultBox {
+  margin-top: 15px;
+}
+
+.resultScroll {
+  max-height: 220px; /* control height */
+  overflow-y: auto;
+  margin-top: 10px;
+  padding-right: 6px; /* space for scrollbar */
+}
+
+.resultList li.bad {
+  color: #ffb3b3;
+}
+
+.resultScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resultScroll::-webkit-scrollbar-thumb {
+  background: #3ddc97;
+  border-radius: 4px;
+}
+
+.btn {
+  border: 1px solid #3a4a52;
+  transition: all 0.25s ease;
+}
+
+.btn.readyUpload {
+  border: 1px solid #3ddc97; /* green border */
+  box-shadow: 0 0 8px rgba(61, 220, 151, 0.4);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

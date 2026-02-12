@@ -40,10 +40,7 @@ async function masterListData() {
       [{ studentId: 1 }, { studentId: 2 }, { studentId: 3 }],
       { ordered: false },
     );
-    console.log("✅ Seeded students");
   }
-
-  console.log("✅ Master data ensured");
 }
 
 module.exports = { masterListData };

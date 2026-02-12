@@ -113,8 +113,9 @@ async function getNextRegistrationId() {
   const counter = await Counter.findOneAndUpdate(
     { name: "registrationId" },
     { $inc: { seq: 1 } },
-    { new: true, upsert: true },
+    { upsert: true, returnDocument: "after" },
   );
+
   return counter.seq;
 }
 

@@ -8,12 +8,11 @@ export const api = axios.create({
   timeout: 30000,
 });
 
-// CSV upload
 export async function uploadCsv(file, onProgress) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await api.post("/api/registrations/upload-csv", formData, {
+  const res = await api.post("/api/registrations/upload", formData, {
     headers: { "Content-Type": "multipart/form-data" },
     onUploadProgress: (evt) => {
       if (!evt.total) return;
