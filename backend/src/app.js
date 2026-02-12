@@ -9,6 +9,7 @@ const masterRoutes = require("./routes/master");
 const registrationRoutes = require("./routes/registrations");
 const jobRoutes = require("./routes/jobs");
 const metricsRoutes = require("./routes/metrics");
+const reportsRoutes = require("./routes/reports");
 
 const app = express();
 
@@ -27,7 +28,8 @@ app.use("/api/master", masterRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/metrics", metricsRoutes);
-// 404
+app.use("/api/reports", reportsRoutes);
+
 app.use((req, res) => {
   res.status(404).json({ ok: false, message: "Route not found" });
 });

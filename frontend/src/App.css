@@ -504,3 +504,93 @@
   gap: 20px;
   align-items: stretch;
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.2);
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+}
+
+th:nth-child(1),
+td:nth-child(1) {
+  width: 60px;
+} /* ID */
+
+th:nth-child(2),
+td:nth-child(2) {
+  width: 80px;
+} /* Student */
+
+th:nth-child(3),
+td:nth-child(3) {
+  width: 120px;
+} /* Date */
+
+th:nth-child(4),
+td:nth-child(4) {
+  width: 100px;
+} /* Class Type */
+
+th:nth-child(5),
+td:nth-child(5) {
+  width: 100px;
+} /* Instructor */
+
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select.input {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  padding-right: 35px;
+}
+
+select.input {
+  background-color: #0f1e28; /* dark background */
+  color: #e6f7ff; /* light text */
+  border: 1px solid #1f3b4d;
+  width: 100px;
+  min-width: 90px;
+}
+
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select.input {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  padding-right: 35px;
+}
+
+.tableWrap::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tableWrap::-webkit-scrollbar-thumb {
+  background: rgba(0, 230, 168, 0.4);
+  border-radius: 4px;
+}
+
+.tableWrap {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
