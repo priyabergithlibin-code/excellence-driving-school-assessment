@@ -1,0 +1,33 @@
+:root {
+  --bg: #0b1018;
+  --card: rgba(18, 26, 38, 0.78);
+  --card2: rgba(20, 30, 44, 0.72);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.6);
+  --accent: #39d98a;
+  --danger: #ff6b6b;
+  --warn: #ffb020;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(
+      1200px 600px at 30% 10%,
+      rgba(57, 217, 138, 0.12),
+      transparent
+    ),
+    radial-gradient(
+      900px 500px at 85% 35%,
+      rgba(0, 160, 255, 0.1),
+      transparent
+    ),
+    linear-gradient(180deg, #070a10, #0b1018);
+}

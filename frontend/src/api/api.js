@@ -24,3 +24,28 @@ export async function uploadCsv(file, onProgress) {
 
   return res.data;
 }
+
+// Metrics for chart
+export async function fetchMetrics() {
+  const res = await api.get("/api/metrics/scheduled-classes-per-day");
+  return res.data;
+}
+
+// Reports list
+export async function fetchReports({ from, to, instructor } = {}) {
+  const res = await api.get("/api/reports/classes", {
+    params: { from, to, instructor },
+  });
+  return res.data;
+}
+
+// Config read/save
+export async function fetchConfig() {
+  const res = await api.get("/api/config");
+  return res.data;
+}
+
+export async function saveConfig(payload) {
+  const res = await api.put("/api/config", payload);
+  return res.data;
+}
