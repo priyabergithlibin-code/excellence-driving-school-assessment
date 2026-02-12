@@ -320,7 +320,7 @@ async function processRegistrations(rows) {
             errResult({
               rowIndex: i,
               action,
-              message: "Overlap: student or instructor already booked",
+              message: "Student or Instructor already booked",
             }),
           );
           continue;
@@ -425,7 +425,7 @@ async function processRegistrations(rows) {
           errResult({
             rowIndex: i,
             action,
-            message: "Overlap: student or instructor already booked",
+            message: "Student or Instructor already booked",
           }),
         );
         continue;

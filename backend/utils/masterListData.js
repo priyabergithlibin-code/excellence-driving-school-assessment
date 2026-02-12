@@ -15,11 +15,10 @@ async function masterListData() {
       ],
       { ordered: false },
     );
-    console.log("✅ Seeded instructors");
   }
 
   const classCount = await ClassType.countDocuments();
-  console.log("Class count:", classCount);
+
   if (classCount === 0) {
     await ClassType.insertMany(
       [
@@ -31,7 +30,6 @@ async function masterListData() {
       ],
       { ordered: false },
     );
-    console.log("✅ Seeded class types");
   }
 
   const studentCount = await Student.countDocuments();

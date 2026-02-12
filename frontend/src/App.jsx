@@ -6,7 +6,7 @@ import Settings from "./pages/Settings";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("Dashboard");
-  console.log("activeTab:", activeTab);
+
   return (
     <div className="app">
       <TopNav activeTab={activeTab} onTabChange={setActiveTab} />

@@ -516,7 +516,7 @@
 }
 
 .resultScroll {
-  max-height: 220px;
+  max-height: 145px;
   overflow-y: auto;
   margin-top: 10px;
   padding-right: 6px;
