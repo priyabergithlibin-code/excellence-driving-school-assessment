@@ -36,7 +36,6 @@ export default function UploadCard({
 
     setFile(f);
 
-    // allow picking the same file again
     e.target.value = "";
   }
 
@@ -54,14 +53,11 @@ export default function UploadCard({
     try {
       await onUpload(file);
 
-      // Parent should clear uploadError when success,
-      // but we also clear selection if there is no error currently.
       if (!uploadError) {
         setFile(null);
       }
     } catch (err) {
       console.error("UploadCard: upload failed", err);
-      // Don't clear file on failure; let user retry
     }
   }
 

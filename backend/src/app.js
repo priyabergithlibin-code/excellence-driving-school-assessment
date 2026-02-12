@@ -8,6 +8,7 @@ const healthRoutes = require("./routes/health");
 const masterRoutes = require("./routes/master");
 const registrationRoutes = require("./routes/registrations");
 const jobRoutes = require("./routes/jobs");
+const metricsRoutes = require("./routes/metrics");
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use("/health", healthRoutes);
 app.use("/api/master", masterRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/jobs", jobRoutes);
-
+app.use("/api/metrics", metricsRoutes);
 // 404
 app.use((req, res) => {
   res.status(404).json({ ok: false, message: "Route not found" });
