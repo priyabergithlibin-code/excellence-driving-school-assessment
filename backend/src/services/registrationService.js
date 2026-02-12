@@ -1,9 +1,9 @@
 const { env } = require("../config/env");
-
 const Registration = require("../models/Registration");
 const Student = require("../models/student.js");
 const Instructor = require("../models/Instructor");
 const ClassType = require("../models/ClassType");
+const { getEffectiveConfig } = require("../services/config/getEffectiveConfig");
 
 function cleanValue(v) {
   if (v === undefined || v === null) return null;
@@ -104,13 +104,10 @@ async function ensureNoOverlap({
     throw new Error("Overlapping session for same student or instructor");
 }
 
-async function ensureDailyLimits({
-  studentId,
-  instructorId,
-  classId,
-  startAt,
-  excludeMongoId = null,
-}) {
+async function ensureDailyLimits(
+  { studentId, instructorId, classId, startAt, excludeMongoId = null },
+  cfg,
+) {
   const { start, end } = getDayBounds(startAt);
 
   if (studentId) {
@@ -122,9 +119,9 @@ async function ensureDailyLimits({
     if (excludeMongoId) q._id = { $ne: excludeMongoId };
 
     const count = await Registration.countDocuments(q);
-    if (count >= Number(env.MAX_CLASSES_PER_STUDENT_PER_DAY)) {
+    if (count >= Number(cfg.MAX_CLASSES_PER_STUDENT_PER_DAY)) {
       throw new Error(
-        `Student daily limit exceeded (${env.MAX_CLASSES_PER_STUDENT_PER_DAY})`,
+        `Student daily limit exceeded (${cfg.MAX_CLASSES_PER_STUDENT_PER_DAY})`,
       );
     }
   }
@@ -138,14 +135,14 @@ async function ensureDailyLimits({
     if (excludeMongoId) q._id = { $ne: excludeMongoId };
 
     const count = await Registration.countDocuments(q);
-    if (count >= Number(env.MAX_CLASSES_PER_INSTRUCTOR_PER_DAY)) {
+    if (count >= Number(cfg.MAX_CLASSES_PER_INSTRUCTOR_PER_DAY)) {
       throw new Error(
-        `Instructor daily limit exceeded (${env.MAX_CLASSES_PER_INSTRUCTOR_PER_DAY})`,
+        `Instructor daily limit exceeded (${cfg.MAX_CLASSES_PER_INSTRUCTOR_PER_DAY})`,
       );
     }
   }
 
-  if (classId && env.MAX_CLASSES_PER_CLASSTYPE_PER_DAY) {
+  if (classId && cfg.MAX_CLASSES_PER_CLASSTYPE_PER_DAY != null) {
     const q = {
       classId,
       status: "active",
@@ -154,15 +151,15 @@ async function ensureDailyLimits({
     if (excludeMongoId) q._id = { $ne: excludeMongoId };
 
     const count = await Registration.countDocuments(q);
-    if (count >= Number(env.MAX_CLASSES_PER_CLASSTYPE_PER_DAY)) {
+    if (count >= Number(cfg.MAX_CLASSES_PER_CLASSTYPE_PER_DAY)) {
       throw new Error(
-        `Class-type daily limit exceeded (${env.MAX_CLASSES_PER_CLASSTYPE_PER_DAY})`,
+        `Class-type daily limit exceeded (${cfg.MAX_CLASSES_PER_CLASSTYPE_PER_DAY})`,
       );
     }
   }
 }
 
-async function handleNew(row) {
+async function handleNew(row, cfg) {
   if (!row.studentId || !row.instructorId || !row.classId || !row.startAt) {
     throw new Error(
       "Missing required fields for new (Student ID, Instructor ID, Class ID, Class Start Time)",
@@ -171,7 +168,7 @@ async function handleNew(row) {
 
   await validateMasterLists(row);
 
-  const duration = Number(env.CLASS_DURATION_MINUTES);
+  const duration = Number(cfg.CLASS_DURATION_MINUTES);
   const endAt = addMinutes(row.startAt, duration);
 
   await ensureNoOverlap({
@@ -181,12 +178,15 @@ async function handleNew(row) {
     endAt,
   });
 
-  await ensureDailyLimits({
-    studentId: row.studentId,
-    instructorId: row.instructorId,
-    classId: row.classId,
-    startAt: row.startAt,
-  });
+  await ensureDailyLimits(
+    {
+      studentId: row.studentId,
+      instructorId: row.instructorId,
+      classId: row.classId,
+      startAt: row.startAt,
+    },
+    cfg,
+  );
 
   const created = await Registration.create({
     studentId: row.studentId,
@@ -200,7 +200,7 @@ async function handleNew(row) {
   return { registrationId: String(created._id) };
 }
 
-async function handleUpdate(row) {
+async function handleUpdate(row, cfg) {
   if (!row.registrationId)
     throw new Error("Registration ID is required for update");
 
@@ -223,7 +223,7 @@ async function handleUpdate(row) {
     classId: nextClassId,
   });
 
-  const duration = Number(env.CLASS_DURATION_MINUTES);
+  const duration = Number(cfg.CLASS_DURATION_MINUTES);
   const nextEndAt = addMinutes(nextStartAt, duration);
 
   await ensureNoOverlap({
@@ -234,13 +234,16 @@ async function handleUpdate(row) {
     excludeMongoId: existing._id,
   });
 
-  await ensureDailyLimits({
-    studentId: nextStudentId,
-    instructorId: nextInstructorId,
-    classId: nextClassId,
-    startAt: nextStartAt,
-    excludeMongoId: existing._id,
-  });
+  await ensureDailyLimits(
+    {
+      studentId: nextStudentId,
+      instructorId: nextInstructorId,
+      classId: nextClassId,
+      startAt: nextStartAt,
+      excludeMongoId: existing._id,
+    },
+    cfg,
+  );
 
   existing.studentId = nextStudentId;
   existing.instructorId = nextInstructorId;
@@ -268,6 +271,8 @@ async function handleDelete(row) {
 }
 
 async function processRegistrations(rawRows) {
+  const cfg = await getEffectiveConfig();
+
   const results = [];
 
   for (let i = 0; i < rawRows.length; i++) {
@@ -282,8 +287,8 @@ async function processRegistrations(rawRows) {
       }
 
       let payload;
-      if (row.action === "new") payload = await handleNew(row);
-      if (row.action === "update") payload = await handleUpdate(row);
+      if (row.action === "new") payload = await handleNew(row, cfg);
+      if (row.action === "update") payload = await handleUpdate(row, cfg);
       if (row.action === "delete") payload = await handleDelete(row);
 
       results.push({

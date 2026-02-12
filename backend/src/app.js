@@ -10,6 +10,7 @@ const registrationRoutes = require("./routes/registrations");
 const jobRoutes = require("./routes/jobs");
 const metricsRoutes = require("./routes/metrics");
 const reportsRoutes = require("./routes/reports");
+const configRoutes = require("./routes/configRoutes");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/registrations", registrationRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/metrics", metricsRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/api/config", configRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ ok: false, message: "Route not found" });
