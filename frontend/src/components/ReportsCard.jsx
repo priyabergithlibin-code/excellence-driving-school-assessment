@@ -95,120 +95,125 @@ export default function ReportsCard({
 
   return (
     <div className="card" style={{ marginTop: 18 }}>
-      <div className="cardHeaderRow">
-        <div className="filtersRow">
-          <label className="label">
-            From
-            <input
-              type="date"
-              className="input"
-              value={toBackendYYYYMMDD(filters.from)}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, from: e.target.value }))
-              }
-            />
-            <div className="muted small">{toDDMMYYYY(filters.from)}</div>
-          </label>
+      <div className="reportsCard" style={{ marginTop: 18 }}>
+        <div className="cardHeaderRow">
+          <div className="filtersRow">
+            <label className="label">
+              From
+              <input
+                type="date"
+                className="input"
+                value={toBackendYYYYMMDD(filters.from)}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, from: e.target.value }))
+                }
+              />
+              <div className="muted small">{toDDMMYYYY(filters.from)}</div>
+            </label>
 
-          <label className="label">
-            To Date
-            <input
-              type="date"
-              className="input"
-              value={toBackendYYYYMMDD(filters.to)}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, to: e.target.value }))
-              }
-            />
-            <div className="muted small">{toDDMMYYYY(filters.to)}</div>
-          </label>
+            <label className="label">
+              To Date
+              <input
+                type="date"
+                className="input"
+                value={toBackendYYYYMMDD(filters.to)}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, to: e.target.value }))
+                }
+              />
+              <div className="muted small">{toDDMMYYYY(filters.to)}</div>
+            </label>
 
-          <label className="label">
-            Instructor
-            <select
-              className="input"
-              value={filters.instructor}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, instructor: e.target.value }))
-              }
-            >
-              {instructorOptions.map((i) => (
-                <option key={i} value={i}>
-                  {i}
-                </option>
-              ))}
-            </select>
-            <div className="muted small">
-              {rows.length
-                ? `${instructorOptions.length - 1} instructors`
-                : "Load data to see instructors"}
-            </div>
-          </label>
+            <label className="label">
+              Instructor
+              <select
+                className="input"
+                value={filters.instructor}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    instructor: e.target.value,
+                  }))
+                }
+              >
+                {instructorOptions.map((i) => (
+                  <option key={i} value={i}>
+                    {i}
+                  </option>
+                ))}
+              </select>
+              <div className="muted small">
+                {rows.length
+                  ? `${instructorOptions.length - 1} instructors`
+                  : "Load data to see instructors"}
+              </div>
+            </label>
+          </div>
+
+          <button
+            className="btn uploadSubmit readyUpload"
+            type="button"
+            onClick={applyFilters}
+            disabled={loading}
+            title={isInvalidRange ? "Fix date range first" : "Apply filters"}
+          >
+            {loading ? "Filtering..." : "Filter"}
+          </button>
         </div>
 
-        <button
-          className="btn uploadSubmit readyUpload"
-          type="button"
-          onClick={applyFilters}
-          disabled={loading}
-          title={isInvalidRange ? "Fix date range first" : "Apply filters"}
-        >
-          {loading ? "Filtering..." : "Filter"}
-        </button>
-      </div>
+        {isInvalidRange ? (
+          <div className="warn small">From date cannot be after To date.</div>
+        ) : null}
 
-      {isInvalidRange ? (
-        <div className="warn small">From date cannot be after To date.</div>
-      ) : null}
+        {error ? <div className="warn small">{error}</div> : null}
 
-      {error ? <div className="warn small">{error}</div> : null}
-
-      <div className="tableWrap">
-        <table className="table">
-          <thead>
-            <tr>
-              <th style={{ width: 70 }}>ID</th>
-              <th style={{ width: 110 }}>Student</th>
-              <th style={{ width: 120 }}>Date</th>
-              <th>Class Type</th>
-              <th style={{ width: 160 }}>Instructor</th>
-              <th style={{ width: 140 }}>Scheduled Time</th>
-              <th style={{ width: 160 }}>Duration (mins)</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading ? (
+        <div className="tableWrap">
+          <table className="table">
+            <thead>
               <tr>
-                <td colSpan={7} className="muted small">
-                  Loading reports...
-                </td>
+                <th style={{ width: 70 }}>ID</th>
+                <th style={{ width: 110 }}>Student</th>
+                <th style={{ width: 120 }}>Date</th>
+                <th>Class Type</th>
+                <th style={{ width: 160 }}>Instructor</th>
+                <th style={{ width: 140 }}>Scheduled Time</th>
+                <th style={{ width: 160 }}>Duration (mins)</th>
               </tr>
-            ) : rows.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="muted small">
-                  No reports found.
-                </td>
-              </tr>
-            ) : (
-              rows.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.id}</td>
-                  <td>{r.studentId}</td>
-                  <td>{toDDMMYYYY(r.date)}</td>
-                  <td>{r.classType}</td>
-                  <td>{r.instructor}</td>
-                  <td>{r.scheduledTime || "-"}</td>
-                  <td>{r.durationMins ?? "-"}</td>
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="muted small">
+                    Loading reports...
+                  </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="muted small">
+                    No reports found.
+                  </td>
+                </tr>
+              ) : (
+                rows.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.id}</td>
+                    <td>{r.studentId}</td>
+                    <td>{toDDMMYYYY(r.date)}</td>
+                    <td>{r.classType}</td>
+                    <td>{r.instructor}</td>
+                    <td>{r.scheduledTime || "-"}</td>
+                    <td>{r.durationMins ?? "-"}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      <div className="muted small" style={{ marginTop: 10 }}>
-        Showing {rows.length} result{rows.length === 1 ? "" : "s"}.
+        <div className="muted small" style={{ marginTop: 10 }}>
+          Showing {rows.length} result{rows.length === 1 ? "" : "s"}.
+        </div>
       </div>
     </div>
   );
