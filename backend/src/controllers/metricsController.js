@@ -27,6 +27,7 @@ function formatYYYYMMDDUTC(d) {
 
 async function getScheduledClassesPerDay(req, res, next) {
   try {
+    res.set("Cache-Control", "no-store");
     const now = new Date();
     const defaultTo = now;
     const defaultFrom = new Date(now);
