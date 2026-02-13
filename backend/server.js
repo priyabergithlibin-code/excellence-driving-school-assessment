@@ -3,25 +3,27 @@ require("dotenv").config();
 const http = require("http");
 const { app } = require("./src/app");
 const { connectDB } = require("./src/config/db");
-const { env } = require("./src/config/env");
 const MasterData = require("./utils/masterListData");
 
+const PORT = process.env.PORT || 4000;
+
 async function start() {
+  const server = http.createServer(app);
+
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+
   try {
-    await connectDB(env.MONGO_URI);
+    const mongoUri = process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error("MONGO_URI is missing in Render Environment Variables");
+    }
 
+    await connectDB(mongoUri);
     await MasterData.masterListData();
-
-    const server = http.createServer(app);
-
-    const PORT = process.env.PORT || env.PORT || 4000;
-
-    server.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server running on port ${PORT}`);
-    });
   } catch (err) {
-    console.error("Server not started:", err);
-    process.exit(1);
+    console.error("Startup error:", err?.message || err);
   }
 }
 
