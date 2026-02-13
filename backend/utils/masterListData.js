@@ -1,4 +1,4 @@
-const Student = require("../src/models/student.js");
+const Student = require("../src/models/Student.js");
 const Instructor = require("../src/models/Instructor");
 const ClassType = require("../src/models/ClassType");
 

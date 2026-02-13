@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Registration = require("../../models/Registration");
-const Student = require("../../models/student.js");
+const Student = require("../../models/Student.js");
 const Instructor = require("../../models/Instructor");
 const ClassType = require("../../models/ClassType");
 const Counter = require("../../models/Counter");
