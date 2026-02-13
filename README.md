@@ -9,4 +9,5 @@
 ### Setting page
 <img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/dcd69acd-a89b-426b-877c-7fc0fd7562f0" />
 
-
+### Mobile view
+<img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/7fa97f31-473c-4150-836d-6dfb1eacff3b" />
