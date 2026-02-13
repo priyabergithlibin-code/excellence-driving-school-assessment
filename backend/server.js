@@ -13,8 +13,11 @@ async function start() {
     await MasterData.masterListData();
 
     const server = http.createServer(app);
-    server.listen(env.PORT, () => {
-      console.log(`Server running on http://localhost:${env.PORT}`);
+
+    const PORT = process.env.PORT || env.PORT || 4000;
+
+    server.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
     console.error("Server not started:", err);
