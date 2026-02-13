@@ -32,6 +32,13 @@ app.use("/api/metrics", metricsRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/config", configRoutes);
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "success",
+    message: "Elite Driving School API is running",
+  });
+});
+
 app.use((req, res) => {
   res.status(404).json({ ok: false, message: "Route not found" });
 });

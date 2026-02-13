@@ -8,7 +8,7 @@ const RegistrationSchema = new mongoose.Schema(
     classTypeId: { type: String, required: true, index: true },
     startTime: { type: Date, required: true, index: true },
     endTime: { type: Date, required: true, index: true },
-    status: { type: String, enum: ["active", "canceled"], default: "active" },
+    status: { type: String, enum: ["active", "cancelled"], default: "active" },
   },
   { timestamps: true },
 );

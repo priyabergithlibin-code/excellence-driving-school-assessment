@@ -264,7 +264,7 @@ async function handleDelete(row) {
   if (!existing)
     throw new Error(`Registration not found: ${row.registrationId}`);
 
-  existing.status = "canceled";
+  existing.status = "cancelled";
   await existing.save();
 
   return { registrationId: String(existing._id) };

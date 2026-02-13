@@ -5,18 +5,7 @@ const Instructor = require("../../models/Instructor");
 const ClassType = require("../../models/ClassType");
 const Counter = require("../../models/Counter");
 
-const CLASS_DURATION_MINUTES = Number(process.env.CLASS_DURATION_MINUTES || 45);
-const MAX_STUDENT_CLASSES_PER_DAY = Number(
-  process.env.MAX_STUDENT_CLASSES_PER_DAY || 3,
-);
-const MAX_INSTRUCTOR_CLASSES_PER_DAY = Number(
-  process.env.MAX_INSTRUCTOR_CLASSES_PER_DAY || 6,
-);
-
-const MAX_CLASSES_PER_TYPE_PER_DAY =
-  process.env.MAX_CLASSES_PER_TYPE_PER_DAY != null
-    ? Number(process.env.MAX_CLASSES_PER_TYPE_PER_DAY)
-    : null;
+const { getEffectiveConfig } = require("../config/getEffectiveConfig");
 
 function normalizeAction(value) {
   return String(value || "")
@@ -190,6 +179,19 @@ async function ensureClassType(classTypeId) {
 async function processRegistrations(rows) {
   const results = [];
 
+  const cfg = await getEffectiveConfig();
+  const CLASS_DURATION_MINUTES = Number(cfg?.CLASS_DURATION_MINUTES ?? 45);
+  const MAX_STUDENT_CLASSES_PER_DAY = Number(
+    cfg?.MAX_CLASSES_PER_STUDENT_PER_DAY ?? 3,
+  );
+  const MAX_INSTRUCTOR_CLASSES_PER_DAY = Number(
+    cfg?.MAX_CLASSES_PER_INSTRUCTOR_PER_DAY ?? 6,
+  );
+  const MAX_CLASSES_PER_TYPE_PER_DAY =
+    cfg?.MAX_CLASSES_PER_CLASSTYPE_PER_DAY != null
+      ? Number(cfg.MAX_CLASSES_PER_CLASSTYPE_PER_DAY)
+      : null;
+
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const action = normalizeAction(getField(row, "Action"));
@@ -250,7 +252,7 @@ async function processRegistrations(rows) {
           continue;
         }
 
-        existing.status = "canceled";
+        existing.status = "cancelled";
         await existing.save();
 
         results.push(
@@ -258,7 +260,7 @@ async function processRegistrations(rows) {
             rowIndex: i,
             action,
             registrationId: existing.registrationId,
-            message: "Canceled",
+            message: "Cancelled",
           }),
         );
         continue;
@@ -368,6 +370,7 @@ async function processRegistrations(rows) {
           );
           continue;
         }
+
         const nextRegistrationId = await getNextRegistrationId();
 
         const created = await Registration.create({

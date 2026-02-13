@@ -59,7 +59,7 @@ async function updateConfig(req, res, next) {
     const updated = await AppConfig.findOneAndUpdate(
       {},
       { $set: payload },
-      { new: true, upsert: true },
+      { upsert: true, returnDocument: "after" },
     ).lean();
 
     res.json({ ok: true, message: "Saved", config: updated });

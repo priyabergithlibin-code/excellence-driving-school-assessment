@@ -12,6 +12,7 @@ async function masterListData() {
         { instructorId: 333, name: "Instructor 333" },
         { instructorId: 444, name: "Instructor 444" },
         { instructorId: 555, name: "Instructor 555" },
+        { instructorId: 666, name: "Instructor 666" },
       ],
       { ordered: false },
     );

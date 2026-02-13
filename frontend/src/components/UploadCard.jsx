@@ -145,7 +145,7 @@ export default function UploadCard({
                 let verb = "processed";
                 if (action === "new") verb = "created";
                 else if (action === "update") verb = "updated";
-                else if (action === "delete") verb = "canceled";
+                else if (action === "delete") verb = "cancelled";
 
                 return (
                   <li
@@ -153,7 +153,7 @@ export default function UploadCard({
                     className={r.status === "success" ? "ok" : "bad"}
                   >
                     {r.status === "success"
-                      ? `Registration ID ${id} has been ${verb} successfully.`
+                      ? `Registration ID ${id} has been ${verb}.`
                       : `Row ${r.row ?? idx} was rejected - ${
                           r.message || "Unknown error."
                         }`}
